@@ -1,225 +1,295 @@
-# IDLIX Video Downloader & Player  
-CLI + GUI Version (Tkinter + FFplay)
+# IDLIX Downloader API 🎬
 
-IDLIX CLI Video Downloader & Video Player adalah program berbasis command-line interface (CLI) yang dirancang untuk mengunduh dan memutar video dari platform IDLIX dengan efisien. program ini memungkinkan pengguna untuk
-berinteraksi langsung dengan platform IDLIX, sehingga mereka dapat mengunduh video sesuai dengan preferensi link atau featured movie. Setelah diunduh video dapat diputar dengan lancar menggunakan bantuan FFmpeg / FFplay
+![Created by dewhush](https://img.shields.io/badge/Created%20by-dewhush-blue)
+![Modified from](https://img.shields.io/badge/Modified%20from-sandrocods%2FIdlixDownloader-orange)
+![Python](https://img.shields.io/badge/Python-3.8%2B-green)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-teal)
 
-- Pemilihan resolusi (variant playlist)
-- Subtitle otomatis (VTT → SRT)
-- Downloader M3U8 multithread
-- Pemutar video via FFplay
-- GUI berbasis Tkinter dengan poster grid
+REST API wrapper for IDLIX movie/series downloader. Download movies from IDLIX with subtitle embedding support.
 
-Program mendukung Windows dan Linux.
+> **Permission granted by original author [sandrocods](https://github.com/sandrocods/IdlixDownloader)**
 
-------------------------------------------------------------
+---
 
-# Fitur Utama
+## ✨ Features
 
-| Nama                    | Deskripsi                                                          | Status |
-|-------------------------|--------------------------------------------------------------------|--------|
-| Featured Movie List     | Menampilkan daftar film unggulan                                   | ✔      |
-| Poster Grid GUI         | Menampilkan poster film dalam grid                                 | ✔      |
-| Play Featured Movie     | Memutar film dari featured                                         | ✔      |
-| Download Featured Movie | Mengunduh film dari featured                                       | ✔      |
-| Play Movie by URL       | Memutar film berdasarkan URL                                       | ✔      |
-| Download Movie by URL   | Mengunduh film berdasarkan URL                                     | ✔      |
-| Select Resolution       | Memilih resolusi (variant playlist)                                | ✔      |
-| Subtitle Support        | Download dan load subtitle otomatis                                | ✔      |
-| FFplay Integration      | Pemutaran video stabil                                              | ✔      |
-| Stop Player Feature     | Menghentikan ffplay                                                 | ✔      |
-| Download Folder Button  | Membuka folder hasil download                                       | ✔      |
-| Log Console GUI         | Log real-time seperti terminal                                      | ✔      |
+| Feature | Description |
+|---------|-------------|
+| 🎬 Featured Movies | Get list of featured movies from homepage |
+| 📺 Video Info | Get video metadata (title, poster, ID) |
+| 🔗 Streaming URL | Get M3U8 streaming URL with quality options |
+| 📥 Download | Download video with auto subtitle embedding |
+| 🔐 API Key Auth | Secure endpoints with API key authentication |
+| 🔄 Auto URL Detection | Automatically detect active IDLIX domain |
 
-------------------------------------------------------------
+---
 
-# Package Utama
+## 📦 Installation
 
-- curl_cffi
-- requests
-- m3u8-To-MP4
-- beautifulsoup4
-- pycryptodomex
-- pillow
-- tkinter
-- FFmpeg / FFplay
+### 1. Clone Repository
 
-------------------------------------------------------------
+```bash
+git clone https://github.com/dewhush/Idlix-Downloader
+cd Idlix-Downloader
+```
 
-# 🔽 Download (Rekomendasi)
+### 2. Install Dependencies
 
-Untuk pengguna Windows **tidak perlu Python**.  
-Cukup download file `.exe` di halaman Release:
-
-👉 https://github.com/sandrocods/IdlixDownloader/releases/latest
-
-# # 🔧 Instalasi dari Source (Opsional)
-
-1. Clone repository:
-git clone https://github.com/sandrocods/IdlixDownloader
-cd IdlixDownloader
-
-2. Install requirements:
+```bash
 pip install -r requirements.txt
+```
 
-3. Jalankan GUI:
-python main_gui.py
+### 3. Configure Environment
 
-4. Jalankan CLI:
-python main.py
+```bash
+# Copy example config
+cp .env.example .env
 
-------------------------------------------------------------
+# Edit .env and set your API_KEY
+```
 
-# Cara Penggunaan (GUI)
+**.env configuration:**
+```env
+APP_NAME=Idlix-Downloader-API
+APP_ENV=development
+API_KEY=your-secret-api-key
+```
 
-1. GUI akan menampilkan poster film dari homepage IDLIX.
-2. Klik poster → Play atau Download.
-3. Tersedia tombol:
-   - Play by URL
-   - Download by URL
-   - Stop Player
-   - Open Downloads Folder
-   - Clear Log
-4. Subtitle otomatis didownload dan dikonversi.
-5. Player menggunakan ffplay.
+### 4. Install FFmpeg (Optional - for subtitle embedding)
 
-------------------------------------------------------------
+**Windows:**
+Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH.
 
-# Screenshots (GUI Version)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/gui1.jpg?raw=true)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/gui2.jpg?raw=true)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/gui3.jpg?raw=true)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/gui4.jpg?raw=true)
+**Linux:**
+```bash
+sudo apt install ffmpeg
+```
 
-------------------------------------------------------------
+---
 
+## 🚀 Running the API
 
-# Fitur CLI
+### Windows
 
-Menu CLI:
+```batch
+run_api.bat
+```
 
-1. Download Featured Movie
-2. Play Featured Movie
-3. Download Movie by URL
-4. Play Movie by URL
-5. Exit
+### Manual / Linux
 
-Dengan retry logic dan output tabel PrettyTable.
+```bash
+python -m uvicorn api:app --host 0.0.0.0 --port 8000 --reload
+```
 
+The API will be available at `http://localhost:8000`
 
-------------------------------------------------------------
+---
 
-# Screenshots (CLI Version)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/1.jpg?raw=true)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/2.jpg?raw=true)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/3.jpg?raw=true)
-![](https://github.com/sandrocods/IdlixDownloader/blob/master/ss/4.jpg?raw=true)
+## 📖 API Documentation
 
-------------------------------------------------------------
+### Interactive Docs
 
-------------------------------------------------------------
+- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-# Auto Install FFmpeg (Windows Only)
+### Authentication
 
-Program akan otomatis:
+All endpoints (except `/health`) require API key authentication.
 
-1. Mengunduh ffmpeg-release-essentials.zip
-2. Mengekstrak ke folder src/ffmpeg
-3. Menambahkan PATH secara otomatis
+**Header:**
+```
+X-API-Key: your-api-key
+```
 
-------------------------------------------------------------
+---
 
-# Roadmap
+## 🔌 Endpoints
 
-- Support TV series / episode
-- Search movie (GUI)
-- History (watch & download)
-- Dark/Light Theme
-- Download progress bar
-- Fullscreen GUI player mode
+### Health Check
 
-------------------------------------------------------------
+```
+GET /health
+```
 
-# Changelog
+No authentication required.
 
-2025-11-28 — BIG UPDATE
------------------------
-Added:
-- GUI lengkap Tkinter
-- Poster grid scrollable
-- Play & Download by URL
-- Popup menu per movie
-- Stop player
-- Open folder
-- Clear log
-- Log GUI
-- Retry logic 3x
-- Perbaikan helper
-- Subtitle & m3u8 handling lebih robust
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-01-17T01:45:00"
+}
+```
 
-Updated:
-- Struktur process movie
-- UI lebih intuitif
-- Logger lebih clean
+---
 
-------------------------------------------------------------
+### API Status
 
-2024-11-27
-----------
-Updated API untuk server baru
+```
+GET /status
+```
 
-------------------------------------------------------------
+**Headers:** `X-API-Key: your-api-key`
 
-2024-08-21
-----------
-Added:
-- README.md
-- requirements.txt
-- Screenshots
+**Response:**
+```json
+{
+  "app_name": "Idlix-Downloader-API",
+  "environment": "development",
+  "uptime_seconds": 3600.5,
+  "active_idlix_url": "https://tv12.idlixku.com/",
+  "version": "1.0.0"
+}
+```
 
-Updated:
-- Subtitle & resolusi
-- Helper Linux
-- Optimasi project
+---
 
-------------------------------------------------------------
+### Get Featured Movies
 
-2023-03-28
-----------
-General improvements
+```
+GET /v1/featured
+```
 
-------------------------------------------------------------
+**Headers:** `X-API-Key: your-api-key`
 
-2022-09-09
-----------
-Added worker threads  
-Updated logging  
-Cleaned code  
-Removed redundant logs
+**Response:**
+```json
+{
+  "status": true,
+  "count": 10,
+  "movies": [
+    {
+      "url": "https://tv12.idlixku.com/movie/example/",
+      "title": "Example Movie",
+      "year": "2024",
+      "type": "movie",
+      "poster": "https://..."
+    }
+  ]
+}
+```
 
-------------------------------------------------------------
+---
 
-2022-09-08
-----------
-Fixed API update issues
+### Get Video Info
 
-------------------------------------------------------------
+```
+POST /v1/video-info
+```
 
-2022-08-17
-----------
-Added ffmpeg integration  
-Fixed exe issues  
-Added tutorial images  
+**Headers:** `X-API-Key: your-api-key`
 
-------------------------------------------------------------
+**Request Body:**
+```json
+{
+  "url": "https://tv12.idlixku.com/movie/example/"
+}
+```
 
-2022-08-12 — Initial Commit
----------------------------
+**Response:**
+```json
+{
+  "status": true,
+  "video_id": "12345",
+  "video_name": "Example Movie",
+  "poster": "https://..."
+}
+```
 
-------------------------------------------------------------
+---
 
-# Disclaimer
+### Get Stream URL
 
-Program ini dibuat untuk pembelajaran.  
-Segala penyalahgunaan di luar tanggung jawab pembuat.
+```
+POST /v1/get-stream
+```
 
+**Headers:** `X-API-Key: your-api-key`
+
+**Request Body:**
+```json
+{
+  "url": "https://tv12.idlixku.com/movie/example/",
+  "quality_id": "0"
+}
+```
+
+**Response:**
+```json
+{
+  "status": true,
+  "m3u8_url": "https://jeniusplay.com/.../master.m3u8",
+  "qualities": [
+    {"id": "0", "resolution": "1920x1080", "bandwidth": 5000000},
+    {"id": "1", "resolution": "1280x720", "bandwidth": 2500000}
+  ],
+  "has_multiple_qualities": true,
+  "subtitle_url": "https://..."
+}
+```
+
+---
+
+### Download Video
+
+```
+POST /v1/download
+```
+
+**Headers:** `X-API-Key: your-api-key`
+
+**Request Body:**
+```json
+{
+  "url": "https://tv12.idlixku.com/movie/example/",
+  "quality_id": "0",
+  "embed_subtitle": true
+}
+```
+
+**Response:**
+```json
+{
+  "status": true,
+  "file_path": "/path/to/Example Movie.mp4",
+  "file_name": "Example Movie.mp4",
+  "message": "Download completed successfully"
+}
+```
+
+---
+
+## 🛠️ Project Structure
+
+```
+Idlix-Downloader/
+├── api.py              # FastAPI app & routes
+├── idlix_service.py    # Core scraping logic
+├── src/
+│   └── CryptoJsAesHelper.py
+├── requirements.txt
+├── .env.example
+├── run_api.bat
+├── .gitignore
+└── README.md
+```
+
+---
+
+## ⚠️ Disclaimer
+
+This project is created for educational purposes only. Any misuse is the user's responsibility.
+
+---
+
+## 🙏 Credits
+
+**Created by:** [dewhush](https://github.com/dewhush)
+
+**Original Author:** [sandrocods](https://github.com/sandrocods/IdlixDownloader)
+
+---
+
+```
+Created by dewhush
+```

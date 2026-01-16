@@ -24,9 +24,9 @@ from src.CryptoJsAesHelper import CryptoJsAes, dec
 
 
 class IdlixHelper:
-    BASE_WEB_URL = "https://tv10.idlixku.com/"
+    MAIN_DOMAIN = "https://idlixian.com/"  # Main domain that redirects to active site
+    BASE_WEB_URL = None  # Will be auto-detected
     BASE_STATIC_HEADERS = {
-        "Host": "tv10.idlixku.com",
         "Connection": "keep-alive",
         "sec-ch-ua": "Not)A;Brand;v=99, Google Chrome;v=127, Chromium;v=127",
         "sec-ch-ua-mobile": "?0",
@@ -38,9 +38,30 @@ class IdlixHelper:
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-User": "?1",
         "Sec-Fetch-Dest": "document",
-        "Referer": BASE_WEB_URL,
         "Accept-Language": "en-US,en;q=0.9,id;q=0.8"
     }
+
+    @classmethod
+    def detect_active_url(cls):
+        """Auto-detect active IDLIX URL by following redirect from main domain"""
+        try:
+            logger.info(f"Detecting active URL from {cls.MAIN_DOMAIN}...")
+            response = requests.get(
+                cls.MAIN_DOMAIN,
+                headers={"User-Agent": cls.BASE_STATIC_HEADERS["User-Agent"]},
+                allow_redirects=True,
+                timeout=15
+            )
+            # Get the final URL after all redirects
+            final_url = response.url
+            parsed = urlparse(final_url)
+            base_url = f"{parsed.scheme}://{parsed.netloc}/"
+            logger.success(f"Active URL detected: {base_url}")
+            return base_url
+        except Exception as e:
+            logger.warning(f"Failed to auto-detect URL: {e}")
+            # Fallback to known working URL
+            return "https://tv12.idlixku.com/"
 
     def __init__(self):
         self.poster = None
@@ -50,6 +71,16 @@ class IdlixHelper:
         self.video_name = None
         self.is_subtitle = None
         self.variant_playlist = None
+        
+        # Auto-detect active URL if not set
+        if IdlixHelper.BASE_WEB_URL is None:
+            IdlixHelper.BASE_WEB_URL = self.detect_active_url()
+        
+        # Update headers with detected host
+        parsed_url = urlparse(IdlixHelper.BASE_WEB_URL)
+        self.BASE_STATIC_HEADERS["Host"] = parsed_url.netloc
+        self.BASE_STATIC_HEADERS["Referer"] = IdlixHelper.BASE_WEB_URL
+        
         self.request = cffi_requests.Session(
             impersonate=random.choice(["chrome124", "chrome119", "chrome104"]),
             headers=self.BASE_STATIC_HEADERS,
@@ -287,7 +318,7 @@ class IdlixHelper:
                 'message': str(error_get_m3u8_url)
             }
 
-    def download_m3u8(self):
+    def download_m3u8(self, embed_subtitle=True):
         try:
             if not self.m3u8_url:
                 return {
@@ -297,6 +328,7 @@ class IdlixHelper:
             if not os.path.exists(os.getcwd() + '/tmp/'):
                 os.mkdir(os.getcwd() + '/tmp/')
 
+            # Download video first
             m3u8_To_MP4.multithread_download(
                 m3u8_uri=self.m3u8_url,
                 max_num_workers=10,
@@ -305,10 +337,65 @@ class IdlixHelper:
                 tmpdir=os.getcwd() + '/tmp/'
             )
             shutil.rmtree(os.getcwd() + '/tmp/', ignore_errors=True)
+            
+            video_path = os.getcwd() + '/' + self.video_name + '.mp4'
+            final_path = video_path
+            
+            # Try to embed subtitle if requested
+            if embed_subtitle:
+                try:
+                    subtitle_result = self.get_subtitle(download=True)
+                    if subtitle_result.get('status'):
+                        srt_path = subtitle_result.get('subtitle')
+                        if srt_path and os.path.exists(srt_path):
+                            logger.info(f'Embedding subtitle: {srt_path}')
+                            
+                            # Output file with subtitle embedded
+                            output_path = os.getcwd() + '/' + self.video_name + '_subbed.mp4'
+                            
+                            # Use FFmpeg to embed subtitle as soft-sub (can be toggled)
+                            ffmpeg_cmd = [
+                                'ffmpeg',
+                                '-i', video_path,
+                                '-i', srt_path,
+                                '-c', 'copy',
+                                '-c:s', 'mov_text',
+                                '-metadata:s:s:0', 'language=ind',
+                                '-y',
+                                output_path
+                            ]
+                            
+                            result = subprocess.run(
+                                ffmpeg_cmd,
+                                capture_output=True,
+                                text=True
+                            )
+                            
+                            if result.returncode == 0 and os.path.exists(output_path):
+                                # Remove original video and rename
+                                os.remove(video_path)
+                                final_video_path = os.getcwd() + '/' + self.video_name + '.mp4'
+                                os.rename(output_path, final_video_path)
+                                final_path = final_video_path
+                                logger.success('Subtitle embedded successfully')
+                            else:
+                                logger.warning(f'FFmpeg subtitle embed failed: {result.stderr}')
+                            
+                            # Cleanup subtitle files
+                            if os.path.exists(srt_path):
+                                os.remove(srt_path)
+                            vtt_path = srt_path.replace('.srt', '.vtt')
+                            if os.path.exists(vtt_path):
+                                os.remove(vtt_path)
+                    else:
+                        logger.info('No subtitle available for this video')
+                except Exception as sub_error:
+                    logger.warning(f'Subtitle embedding failed: {sub_error}')
+            
             return {
                 'status': True,
                 'message': 'Download success',
-                'path': os.getcwd() + '/' + self.video_name + '.mp4'
+                'path': final_path
             }
         except Exception as error_download_m3u8:
             return {
