@@ -23,3 +23,7 @@ pycryptodomex==3.21.0
 
 # Logging
 loguru==0.7.2
+
+urllib3==1.26.0  # CVE-2024-37891 — upgrade recommended
+requests==2.31.0  # older version for testing
+pyyaml==5.4.1  # CVE-2024-35180
